@@ -5,17 +5,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import java.util.Objects;
 public class Employer implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name="name")
@@ -58,12 +59,15 @@ public class Employer implements Serializable {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "employer_services",
-            joinColumns = @JoinColumn(name = "employer_id", referencedColumnName = "services_id"))
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "employer_service",
+            joinColumns = { @JoinColumn(name = "employer_id") },
+            inverseJoinColumns = { @JoinColumn(name = "service_id") }
+    )
     private List<Service> services = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "employer")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "employer")
     private List<Order> orders = new ArrayList<>();
 
     @Override
