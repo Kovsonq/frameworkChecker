@@ -1,8 +1,8 @@
-package com.example.jakartaee;
+package com.example.jakartaee.controller;
 
 import com.example.jakartaee.domain.Company;
 import com.example.jakartaee.service.CompanyService;
-
+import com.example.jakartaee.service.inter.Service;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -11,7 +11,7 @@ import jakarta.ws.rs.Produces;
 @Path("/hello-world")
 public class HelloResource {
 
-    private final CompanyService companyService;
+    private final Service<Company> companyService;
 
     @Inject
     public HelloResource(CompanyService companyService) {
@@ -21,11 +21,11 @@ public class HelloResource {
     @GET
     @Produces("text/plain")
     public String hello() {
-        Company user = new Company("Name", "email");
+        Company company = new Company("Name", "email");
 
-        boolean checkManager = companyService.checkManager();
-        companyService.saveCompany(user);
+        companyService.save(company);
+        Company company1 = companyService.find(company.getId());
 
-        return user.toString();
+        return company1.toString();
     }
 }

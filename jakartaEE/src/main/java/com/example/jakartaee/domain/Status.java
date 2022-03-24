@@ -1,6 +1,7 @@
 package com.example.jakartaee.domain;
 
 import com.example.jakartaee.domain.values.OrderStatus;
+import jakarta.persistence.NamedQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -23,6 +24,7 @@ import java.util.Objects;
 @Getter
 @ToString
 @NoArgsConstructor
+@NamedQuery(name = "Status.findAll", query = "Select s from Status s")
 public class Status implements Serializable {
 
     @Id

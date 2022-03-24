@@ -1,9 +1,11 @@
 package com.example.jakartaee.service;
 
 import com.example.jakartaee.domain.Company;
+import com.example.jakartaee.repository.CompanyRepository;
+import com.example.jakartaee.repository.impl.CompanyRepositoryJpa;
+import com.example.jakartaee.service.inter.Service;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import java.io.Serializable;
@@ -11,28 +13,34 @@ import java.util.List;
 
 @ApplicationScoped
 @Transactional
-public class CompanyService implements Serializable {
+public class CompanyService implements Service<Company>, Serializable {
 
-    @PersistenceContext
-    private EntityManager em;
+    private final CompanyRepository companyRepository;
 
-    public Company findCompany(Long id) {
-        return em.find(Company.class, id);
+    @Inject
+    public CompanyService(CompanyRepositoryJpa companyRepository) {
+        this.companyRepository = companyRepository;
     }
 
-    public void saveCompany(Company company) {
-        em.persist(company);
+    @Override
+    public Company save(Company company)  {
+        return companyRepository.save(company);
     }
 
-    public void deleteCompany(Company company) {
-        em.remove(company);
+    @Override
+    public Company find(Long id)  {
+        return companyRepository.find(id);
     }
 
-    public boolean checkManager(){
-        return em.isOpen();
+    @Override
+    public List<Company> findAll() {
+        return null;
     }
 
-    public List createQuery(String query){
-        return em.createQuery(query).getResultList();
+    @Override
+    public Long delete(Long id)  {
+        companyRepository.delete(id);
+        return id;
     }
+
 }

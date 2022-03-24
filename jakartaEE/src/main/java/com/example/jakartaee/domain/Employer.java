@@ -1,5 +1,6 @@
 package com.example.jakartaee.domain;
 
+import jakarta.persistence.NamedQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,6 +30,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @NoArgsConstructor
+@NamedQuery(name = "Employer.findAll", query = "Select e from Employer e")
 public class Employer implements Serializable {
 
     @Id
@@ -47,13 +49,8 @@ public class Employer implements Serializable {
     @Column(name="email")
     private String email;
 
-    public Employer(String name, char[] password, String phone, String email, Company company) {
-        this.name = name;
-        this.password = password;
-        this.phone = phone;
-        this.email = email;
-        this.company = company;
-    }
+    @Column(name="role")
+    private String role;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
@@ -69,6 +66,14 @@ public class Employer implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employer")
     private List<Order> orders = new ArrayList<>();
+
+    public Employer(String name, char[] password, String phone, String email, Company company) {
+        this.name = name;
+        this.password = password;
+        this.phone = phone;
+        this.email = email;
+        this.company = company;
+    }
 
     @Override
     public boolean equals(Object o) {

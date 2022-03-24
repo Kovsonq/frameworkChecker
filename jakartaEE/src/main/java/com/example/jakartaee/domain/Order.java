@@ -1,5 +1,6 @@
 package com.example.jakartaee.domain;
 
+import jakarta.persistence.NamedQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @NoArgsConstructor
+@NamedQuery(name = "Order.findAll", query = "Select o from Order o")
 public class Order implements Serializable {
 
     @Id
