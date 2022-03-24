@@ -2,19 +2,18 @@ package com.example.jakartaee.controller;
 
 import com.example.jakartaee.domain.Company;
 import com.example.jakartaee.service.CompanyService;
-import com.example.jakartaee.service.inter.Service;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 
-@Path("/hello-world")
-public class HelloResource {
+@Path("/company")
+public class CompanyResource {
 
-    private final Service<Company> companyService;
+    private final CompanyService companyService;
 
     @Inject
-    public HelloResource(CompanyService companyService) {
+    public CompanyResource(CompanyService companyService) {
         this.companyService = companyService;
     }
 
@@ -22,10 +21,8 @@ public class HelloResource {
     @Produces("text/plain")
     public String hello() {
         Company company = new Company("Name", "email");
-
         companyService.save(company);
-        Company company1 = companyService.find(company.getId());
-
+        Company company1 = companyService.findById(company.getId());
         return company1.toString();
     }
 }

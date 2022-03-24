@@ -5,25 +5,34 @@ import com.example.jakartaee.repository.ServiceRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
+@Slf4j
 public class ServiceRepositoryJpa implements ServiceRepository, Serializable {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public Service save(Service service)  {
-        em.persist(service);
-        return service;
+    public Optional<Service> save(Service service)  {
+        try {
+            em.persist(service);
+            return Optional.of(service);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during saving Service.", e);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public Service find(Long id)  {
-        return em.find(Service.class, id);
+    public Optional<Service> findById(Long id)  {
+        Service service = em.find(Service.class, id);
+        return service != null ? Optional.of(service) : Optional.empty();
     }
 
     @Override
@@ -32,9 +41,14 @@ public class ServiceRepositoryJpa implements ServiceRepository, Serializable {
     }
 
     @Override
-    public Long delete(Long id)  {
-        em.remove(find(id));
-        return id;
+    public Optional<Service> delete(Service service) {
+        try {
+            em.remove(service);
+            return Optional.of(service);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during deleting Service.", e);
+        }
+        return Optional.empty();
     }
 
 }

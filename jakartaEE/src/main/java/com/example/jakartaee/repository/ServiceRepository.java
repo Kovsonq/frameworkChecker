@@ -3,15 +3,16 @@ package com.example.jakartaee.repository;
 import com.example.jakartaee.domain.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ServiceRepository {
 
-    Service save(Service service);
+    Optional<Service> save(Service service);
 
-    Service find(Long id);
+    Optional<Service> findById(Long id);
 
     List<Service> findAll();
 
-    Long delete(Long id);
+    Optional<Service> delete(Service service);
 
 }

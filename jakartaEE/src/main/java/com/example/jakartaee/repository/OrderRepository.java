@@ -3,15 +3,16 @@ package com.example.jakartaee.repository;
 import com.example.jakartaee.domain.Order;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository {
 
-    Order save(Order order);
+    Optional<Order> save(Order order);
 
-    Order find(Long id);
+    Optional<Order> findById(Long id);
 
     List<Order> findAll();
 
-    Long delete(Long id);
+    Optional<Order> delete(Order order);
 
 }

@@ -5,25 +5,34 @@ import com.example.jakartaee.repository.EmployerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
+@Slf4j
 public class EmployerRepositoryJpa implements EmployerRepository, Serializable {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public Employer save(Employer employer)  {
-        em.persist(employer);
-        return employer;
+    public Optional<Employer> save(Employer employer)  {
+        try {
+            em.persist(employer);
+            return Optional.of(employer);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during saving Employer.", e);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public Employer find(Long id)  {
-        return em.find(Employer.class, id);
+    public Optional<Employer> findById(Long id)  {
+        Employer employer = em.find(Employer.class, id);
+        return employer != null ? Optional.of(employer) : Optional.empty();
     }
 
     @Override
@@ -32,9 +41,14 @@ public class EmployerRepositoryJpa implements EmployerRepository, Serializable {
     }
 
     @Override
-    public Long delete(Long id)  {
-        em.remove(find(id));
-        return id;
+    public Optional<Employer> delete(Employer employer) {
+        try {
+            em.remove(employer);
+            return Optional.of(employer);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during deleting Employer.", e);
+        }
+        return Optional.empty();
     }
 
 }

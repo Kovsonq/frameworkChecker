@@ -3,15 +3,16 @@ package com.example.jakartaee.repository;
 import com.example.jakartaee.domain.Status;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StatusRepository {
 
-    Status save(Status status);
+    Optional<Status> save(Status status);
 
-    Status find(Long id);
+    Optional<Status> findById(Long id);
 
     List<Status> findAll();
 
-    Long delete(Long id);
+    Optional<Status> delete(Status status);
 
 }

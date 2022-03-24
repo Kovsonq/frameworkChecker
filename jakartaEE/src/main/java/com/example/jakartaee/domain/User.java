@@ -27,6 +27,7 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @NamedQuery(name = "User.findAll", query = "Select u from User u")
+@NamedQuery(name = "User.findByName", query = "Select u from User u where u.name = :name")
 public class User implements Serializable {
 
     @Id

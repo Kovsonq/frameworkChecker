@@ -3,15 +3,18 @@ package com.example.jakartaee.repository;
 import com.example.jakartaee.domain.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository {
 
-    User save(User user);
+    Optional<User> save(User user);
 
-    User find(Long id);
+    Optional<User> findById(Long id);
+
+    Optional<User> findByName(String userName);
 
     List<User> findAll();
 
-    Long delete(Long id);
+    Optional<User> delete(User user);
 
 }

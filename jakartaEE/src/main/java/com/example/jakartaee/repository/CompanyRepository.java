@@ -3,15 +3,16 @@ package com.example.jakartaee.repository;
 import com.example.jakartaee.domain.Company;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanyRepository {
 
-    Company save(Company company);
+    Optional<Company> save(Company company);
 
-    Company find(Long id);
+    Optional<Company> findById(Long id);
 
     List<Company> findAll();
 
-    Long delete(Long id);
+    Optional<Company> delete(Company company);
 
 }

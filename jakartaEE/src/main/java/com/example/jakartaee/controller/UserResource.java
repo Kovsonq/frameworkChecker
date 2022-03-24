@@ -2,7 +2,6 @@ package com.example.jakartaee.controller;
 
 import com.example.jakartaee.domain.User;
 import com.example.jakartaee.service.UserService;
-import com.example.jakartaee.service.inter.Service;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -11,7 +10,7 @@ import jakarta.ws.rs.Produces;
 @Path("/user")
 public class UserResource {
 
-    private final Service<User> userService;
+    private final UserService userService;
 
     @Inject
     public UserResource(UserService userService) {
@@ -19,13 +18,11 @@ public class UserResource {
     }
 
     @GET
-    @Produces("text/plain")
-    public String hello() {
+    @Produces("application/json")
+    public User createUser() {
         User user = new User("Alexius", "secret".toCharArray(), "+31584654", "email");
-
         userService.save(user);
-        User user1 = userService.find(user.getId());
-
-        return user1.toString();
+        return userService.findById(user.getId());
     }
+
 }

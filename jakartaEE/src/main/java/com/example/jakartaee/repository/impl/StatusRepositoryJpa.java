@@ -5,25 +5,34 @@ import com.example.jakartaee.repository.StatusRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
+@Slf4j
 public class StatusRepositoryJpa implements StatusRepository, Serializable {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public Status save(Status status)  {
-        em.persist(status);
-        return status;
+    public Optional<Status> save(Status status)  {
+        try {
+            em.persist(status);
+            return Optional.of(status);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during saving Status.", e);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public Status find(Long id)  {
-        return em.find(Status.class, id);
+    public Optional<Status> findById(Long id)  {
+        Status status = em.find(Status.class, id);
+        return status != null ? Optional.of(status) : Optional.empty();
     }
 
     @Override
@@ -32,9 +41,14 @@ public class StatusRepositoryJpa implements StatusRepository, Serializable {
     }
 
     @Override
-    public Long delete(Long id)  {
-        em.remove(find(id));
-        return id;
+    public Optional<Status> delete(Status status) {
+        try {
+            em.remove(status);
+            return Optional.of(status);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during deleting Status.", e);
+        }
+        return Optional.empty();
     }
 
 }

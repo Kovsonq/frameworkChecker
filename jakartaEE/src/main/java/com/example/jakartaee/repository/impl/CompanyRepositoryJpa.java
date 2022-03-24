@@ -5,25 +5,34 @@ import com.example.jakartaee.repository.CompanyRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
+@Slf4j
 public class CompanyRepositoryJpa implements CompanyRepository, Serializable {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public Company save(Company company)  {
-        em.persist(company);
-        return company;
+    public Optional<Company> save(Company company)  {
+        try {
+            em.persist(company);
+            return Optional.of(company);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during saving Company.", e);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public Company find(Long id)  {
-        return em.find(Company.class, id);
+    public Optional<Company> findById(Long id)  {
+        Company company = em.find(Company.class, id);
+        return company != null ? Optional.of(company) : Optional.empty();
     }
 
     @Override
@@ -32,9 +41,14 @@ public class CompanyRepositoryJpa implements CompanyRepository, Serializable {
     }
 
     @Override
-    public Long delete(Long id)  {
-        em.remove(find(id));
-        return id;
+    public Optional<Company> delete(Company company) {
+        try {
+            em.remove(company);
+            return Optional.of(company);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during deleting Company.", e);
+        }
+        return Optional.empty();
     }
 
 }
