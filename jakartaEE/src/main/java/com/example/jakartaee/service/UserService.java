@@ -1,46 +1,23 @@
 package com.example.jakartaee.service;
 
 import com.example.jakartaee.domain.User;
-import com.example.jakartaee.repository.CompanyRepository;
-import com.example.jakartaee.service.inter.Service;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 
-import java.io.Serializable;
 import java.util.List;
 
-@ApplicationScoped
-@Transactional
-public class UserService implements Service<User>, Serializable {
+public interface UserService {
 
-    private final CompanyRepository<User> userRepository;
+    User save(User user);
 
-    @Inject
-    public UserService(CompanyRepository<User> userRepository) {
-        this.userRepository = userRepository;
-    }
+    User findById(Long id);
 
-    @Override
-    public User save(User user)  {
-        userRepository.save(user);
-        return user;
-    }
+    User findByName(String userName);
 
-    @Override
-    public User find(Long id)  {
-        return userRepository.find(id);
-    }
+    User findByEmail(String userEmail);
 
-    @Override
-    public List<User> findAll() {
-        return null;
-    }
+    List<User> findAll();
 
-    @Override
-    public Long delete(Long id)  {
-        userRepository.delete(id);
-        return id;
-    }
+    User update(User user);
+
+    User delete(Long id);
 
 }

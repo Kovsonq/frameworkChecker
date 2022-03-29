@@ -30,6 +30,17 @@ public class OrderRepositoryJpa implements OrderRepository, Serializable {
     }
 
     @Override
+    public Optional<Order> update(Order order) {
+        try {
+            em.merge(order);
+            return Optional.of(order);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during updating Order.", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Order> findById(Long id)  {
         Order order = em.find(Order.class, id);
         return order != null ? Optional.of(order) : Optional.empty();

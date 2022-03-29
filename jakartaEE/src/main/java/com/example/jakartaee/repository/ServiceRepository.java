@@ -13,6 +13,8 @@ public interface ServiceRepository {
 
     List<Service> findAll();
 
+    Optional<Service> update(Service service);
+
     Optional<Service> delete(Service service);
 
 }

@@ -30,6 +30,17 @@ public class StatusRepositoryJpa implements StatusRepository, Serializable {
     }
 
     @Override
+    public Optional<Status> update(Status status) {
+        try {
+            em.merge(status);
+            return Optional.of(status);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during updating Status.", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Status> findById(Long id)  {
         Status status = em.find(Status.class, id);
         return status != null ? Optional.of(status) : Optional.empty();

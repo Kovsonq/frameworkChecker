@@ -13,6 +13,8 @@ public interface EmployerRepository {
 
     List<Employer> findAll();
 
+    Optional<Employer> update(Employer employer);
+
     Optional<Employer> delete(Employer employer);
 
 }

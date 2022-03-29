@@ -12,6 +12,8 @@ public interface ServiceService {
 
     List<Service> findAll();
 
+    Service update(Service service);
+
     Service delete(Long id);
 
 }

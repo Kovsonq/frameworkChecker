@@ -1,6 +1,7 @@
 package com.example.jakartaee.service.impl;
 
 import com.example.jakartaee.domain.Service;
+import com.example.jakartaee.domain.Status;
 import com.example.jakartaee.repository.ServiceRepository;
 import com.example.jakartaee.service.ServiceService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -38,6 +39,18 @@ public class ServiceServiceImpl implements ServiceService, Serializable {
     @Override
     public List<Service> findAll() {
         return serviceRepository.findAll();
+    }
+
+    @Override
+    public Service update(Service newService) {
+        Service service = findById(newService.getId());
+
+        service.setDescription(newService.getDescription());
+        service.setName(newService.getName());
+        service.setEmployers(newService.getEmployers());
+
+        return serviceRepository.update(service)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity " + service));
     }
 
     @Override

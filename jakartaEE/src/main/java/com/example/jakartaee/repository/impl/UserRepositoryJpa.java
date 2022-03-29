@@ -30,6 +30,17 @@ public class UserRepositoryJpa implements UserRepository, Serializable {
     }
 
     @Override
+    public Optional<User> update(User user) {
+        try {
+            em.merge(user);
+            return Optional.of(user);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during updating User.", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<User> findById(Long id)  {
         User user = em.find(User.class, id);
         return user != null ? Optional.of(user) : Optional.empty();
@@ -39,6 +50,14 @@ public class UserRepositoryJpa implements UserRepository, Serializable {
     public Optional<User> findByName(String userName)  {
         User user = em.createNamedQuery("User.findByName", User.class)
                 .setParameter("name", userName)
+                .getSingleResult();
+        return user != null ? Optional.of(user) : Optional.empty();
+    }
+
+    @Override
+    public Optional<User> findByEmail(String userEmail)  {
+        User user = em.createNamedQuery("User.findByEmail", User.class)
+                .setParameter("name", userEmail)
                 .getSingleResult();
         return user != null ? Optional.of(user) : Optional.empty();
     }

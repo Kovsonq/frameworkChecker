@@ -12,6 +12,8 @@ public interface StatusService {
 
     List<Status> findAll();
 
+    Status update(Status status);
+
     Status delete(Long id);
 
 }

@@ -41,6 +41,22 @@ public class EmployerServiceImpl implements EmployerService, Serializable {
     }
 
     @Override
+    public Employer update(Employer newEmployer) {
+        Employer existedEmployer = findById(newEmployer.getId());
+
+        existedEmployer.setName(newEmployer.getName());
+        existedEmployer.setEmail(newEmployer.getEmail());
+        existedEmployer.setPhone(newEmployer.getPhone());
+        existedEmployer.setCompany(newEmployer.getCompany());
+        existedEmployer.setOrders(newEmployer.getOrders());
+        existedEmployer.setServices(newEmployer.getServices());
+
+        return employerRepository.update(existedEmployer)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity " + existedEmployer));
+    }
+
+
+    @Override
     public Employer delete(Long id) {
         Employer employer = findById(id);
         employerRepository.delete(employer);

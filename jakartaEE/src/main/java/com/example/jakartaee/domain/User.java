@@ -1,6 +1,7 @@
 package com.example.jakartaee.domain;
 
 import jakarta.persistence.NamedQuery;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @NamedQuery(name = "User.findAll", query = "Select u from User u")
 @NamedQuery(name = "User.findByName", query = "Select u from User u where u.name = :name")
+@NamedQuery(name = "User.findByEmail", query = "Select u from User u where u.email = :email")
 public class User implements Serializable {
 
     @Id
@@ -35,9 +37,11 @@ public class User implements Serializable {
     private Long id;
 
     @Column(name="name")
+    @NotNull(message = "User name should be provided.")
     private String name;
 
     @Column(name="password")
+    @NotNull(message = "Password should be provided (char array).")
     private char[] password;
 
     @Column(name="phone")
@@ -61,7 +65,9 @@ public class User implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(name, user.name) && Arrays.equals(password, user.password) && Objects.equals(phone, user.phone) && Objects.equals(email, user.email) && Objects.equals(orders, user.orders);
+        return Objects.equals(name, user.name) && Arrays.equals(password, user.password) &&
+                Objects.equals(phone, user.phone) && Objects.equals(email, user.email) &&
+                Objects.equals(orders, user.orders);
     }
 
     @Override

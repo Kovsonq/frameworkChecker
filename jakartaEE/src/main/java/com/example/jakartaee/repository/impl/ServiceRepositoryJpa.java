@@ -30,6 +30,17 @@ public class ServiceRepositoryJpa implements ServiceRepository, Serializable {
     }
 
     @Override
+    public Optional<Service> update(Service service) {
+        try {
+            em.merge(service);
+            return Optional.of(service);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during updating Service.", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Service> findById(Long id)  {
         Service service = em.find(Service.class, id);
         return service != null ? Optional.of(service) : Optional.empty();

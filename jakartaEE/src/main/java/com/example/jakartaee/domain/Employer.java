@@ -49,9 +49,6 @@ public class Employer implements Serializable {
     @Column(name="email")
     private String email;
 
-    @Column(name="role")
-    private String role;
-
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
@@ -80,7 +77,10 @@ public class Employer implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Employer employer = (Employer) o;
-        return Objects.equals(name, employer.name) && Arrays.equals(password, employer.password) && Objects.equals(phone, employer.phone) && Objects.equals(email, employer.email) && Objects.equals(company, employer.company) && Objects.equals(services, employer.services) && Objects.equals(orders, employer.orders);
+        return Objects.equals(name, employer.name) && Arrays.equals(password, employer.password) &&
+                Objects.equals(phone, employer.phone) && Objects.equals(email, employer.email) &&
+                Objects.equals(company, employer.company) && Objects.equals(services, employer.services) &&
+                Objects.equals(orders, employer.orders);
     }
 
     @Override

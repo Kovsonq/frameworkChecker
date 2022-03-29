@@ -13,6 +13,8 @@ public interface StatusRepository {
 
     List<Status> findAll();
 
+    Optional<Status> update(Status status);
+
     Optional<Status> delete(Status status);
 
 }

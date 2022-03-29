@@ -11,7 +11,11 @@ public interface CompanyRepository {
 
     Optional<Company> findById(Long id);
 
+    Optional<Company> findByName(String companyName);
+
     List<Company> findAll();
+
+    Optional<Company> update(Company company);
 
     Optional<Company> delete(Company company);
 

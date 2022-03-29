@@ -30,6 +30,17 @@ public class EmployerRepositoryJpa implements EmployerRepository, Serializable {
     }
 
     @Override
+    public Optional<Employer> update(Employer employer) {
+        try {
+            em.merge(employer);
+            return Optional.of(employer);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during updating Employer.", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Employer> findById(Long id)  {
         Employer employer = em.find(Employer.class, id);
         return employer != null ? Optional.of(employer) : Optional.empty();

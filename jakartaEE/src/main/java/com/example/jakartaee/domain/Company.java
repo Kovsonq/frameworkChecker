@@ -26,6 +26,7 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @NamedQuery(name = "Company.findAll", query = "Select c from Company c")
+@NamedQuery(name = "Company.findByName", query = "Select c from Company c where c.name = :name")
 public class Company implements Serializable {
 
     @Id
@@ -51,7 +52,8 @@ public class Company implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Company company = (Company) o;
-        return Objects.equals(name, company.name) && Objects.equals(type, company.type) && Objects.equals(employers, company.employers);
+        return Objects.equals(name, company.name) && Objects.equals(type, company.type) &&
+                Objects.equals(employers, company.employers);
     }
 
     @Override

@@ -13,6 +13,8 @@ public interface OrderRepository {
 
     List<Order> findAll();
 
+    Optional<Order> update(Order order);
+
     Optional<Order> delete(Order order);
 
 }

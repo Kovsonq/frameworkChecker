@@ -1,5 +1,7 @@
 package com.example.jakartaee.domain.values;
 
-public enum OrderStatus {
+import java.io.Serializable;
+
+public enum OrderStatus implements Serializable {
     CREATED, APPROVED, CANCELED, STARTED, FINISHED, CLOSED, COMPLETED
 }

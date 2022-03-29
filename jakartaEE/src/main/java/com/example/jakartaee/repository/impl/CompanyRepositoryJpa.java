@@ -36,8 +36,27 @@ public class CompanyRepositoryJpa implements CompanyRepository, Serializable {
     }
 
     @Override
+    public Optional<Company> findByName(String userName)  {
+        Company company = em.createNamedQuery("Company.findByName", Company.class)
+                .setParameter("name", userName)
+                .getSingleResult();
+        return company != null ? Optional.of(company) : Optional.empty();
+    }
+
+    @Override
     public List<Company> findAll() {
         return em.createNamedQuery("Company.findAll", Company.class).getResultList();
+    }
+
+    @Override
+    public Optional<Company> update(Company company) {
+        try {
+            em.merge(company);
+            return Optional.of(company);
+        } catch (final Exception e){
+            log.trace("[ERROR] Error during updating Company.", e);
+        }
+        return Optional.empty();
     }
 
     @Override

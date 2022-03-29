@@ -10,7 +10,11 @@ public interface CompanyService {
 
     Company findById(Long id);
 
+    Company findByName(String userName);
+
     List<Company> findAll();
+
+    Company update(Company company);
 
     Company delete(Long id);
 

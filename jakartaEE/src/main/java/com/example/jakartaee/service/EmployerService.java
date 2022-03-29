@@ -12,6 +12,8 @@ public interface EmployerService {
 
     List<Employer> findAll();
 
+    Employer update(Employer employer);
+
     Employer delete(Long id);
 
 }

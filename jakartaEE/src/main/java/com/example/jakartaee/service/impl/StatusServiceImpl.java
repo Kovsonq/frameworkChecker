@@ -1,6 +1,7 @@
 package com.example.jakartaee.service.impl;
 
 import com.example.jakartaee.domain.Status;
+import com.example.jakartaee.domain.User;
 import com.example.jakartaee.repository.StatusRepository;
 import com.example.jakartaee.service.StatusService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -38,6 +39,20 @@ public class StatusServiceImpl implements StatusService, Serializable {
     @Override
     public List<Status> findAll() {
         return statusRepository.findAll();
+    }
+
+    @Override
+    public Status update(Status newStatus) {
+        Status status = findById(newStatus.getId());
+
+        status.setApprovedTime(newStatus.getApprovedTime());
+        status.setCanceledTime(newStatus.getCanceledTime());
+        status.setStartedTime(newStatus.getStartedTime());
+        status.setFinishedTime(newStatus.getFinishedTime());
+        status.setClosedTime(newStatus.getClosedTime());
+
+        return statusRepository.update(status)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity " + status));
     }
 
     @Override
