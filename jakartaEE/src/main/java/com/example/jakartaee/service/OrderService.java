@@ -1,5 +1,6 @@
 package com.example.jakartaee.service;
 
+import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.domain.Order;
 import com.example.jakartaee.domain.dto.OrdersDetailsDto;
 import com.example.jakartaee.domain.values.ScheduleDetails;
@@ -17,6 +18,10 @@ public interface OrderService {
     Order update(Order order);
 
     Order delete(Long id);
+
+    Order bookOrder(Long id);
+
+    Order releaseOrder(Long id);
 
     List<Order> processOrders(List<Order> newOrders, List<Order> existedOrders);
 

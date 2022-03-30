@@ -113,13 +113,13 @@ public class Order implements Serializable {
         return Objects.equals(startDate, order.startDate) && Objects.equals(endDate, order.endDate) &&
                 Objects.equals(duration, order.duration) && Objects.equals(description, order.description) &&
                 Objects.equals(status, order.status) && Objects.equals(user, order.user) &&
-                Objects.equals(employer, order.employer) &&
-                Objects.equals(booked, order.booked);
+                Objects.equals(employer, order.employer) && Objects.equals(booked, order.booked) &&
+                Objects.equals(scheduleId, order.scheduleId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startDate, endDate, duration, description, status, user, employer, booked);
+        return Objects.hash(startDate, endDate, duration, description, status, user, employer, booked, scheduleId);
     }
 
 }

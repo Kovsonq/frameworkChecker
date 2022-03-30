@@ -4,6 +4,7 @@ import com.example.jakartaee.domain.Service;
 import com.example.jakartaee.service.ServiceService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -49,7 +50,7 @@ public class ServiceController {
         return serviceService.findAll();
     }
 
-    @POST
+    @DELETE
     @Path("/{id}")
     @Produces("application/json")
     public Service deleteService(@PathParam("id") Long id) {

@@ -4,6 +4,7 @@ import com.example.jakartaee.domain.Status;
 import com.example.jakartaee.service.StatusService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -38,7 +39,7 @@ public class StatusController {
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Status findStatus(@PathParam("id") Long id) {
+    public Status findStatusById(@PathParam("id") Long id) {
         return statusService.findById(id);
     }
 
@@ -48,11 +49,46 @@ public class StatusController {
         return statusService.findAll();
     }
 
-    @POST
+    @DELETE
     @Path("/{id}")
     @Produces("application/json")
     public Status deleteStatus(@PathParam("id") Long id) {
         return statusService.delete(id);
+    }
+
+    @PUT
+    @Path("/{id}/approve")
+    @Produces("application/json")
+    public Status approveStatus(@PathParam("id") Long id) {
+        return statusService.approve(id);
+    }
+
+    @PUT
+    @Path("/{id}/cancel")
+    @Produces("application/json")
+    public Status cancelStatus(@PathParam("id") Long id) {
+        return statusService.cancel(id);
+    }
+
+    @PUT
+    @Path("/{id}/start")
+    @Produces("application/json")
+    public Status startStatus(@PathParam("id") Long id) {
+        return statusService.start(id);
+    }
+
+    @PUT
+    @Path("/{id}/finish")
+    @Produces("application/json")
+    public Status finishStatus(@PathParam("id") Long id) {
+        return statusService.finish(id);
+    }
+
+    @PUT
+    @Path("/{id}/close")
+    @Produces("application/json")
+    public Status closeStatus(@PathParam("id") Long id) {
+        return statusService.close(id);
     }
 
 }

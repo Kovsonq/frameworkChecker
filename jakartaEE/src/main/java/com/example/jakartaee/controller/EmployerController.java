@@ -4,6 +4,7 @@ import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.domain.Order;
 import com.example.jakartaee.domain.Service;
 import com.example.jakartaee.domain.dto.OrdersDetailsDto;
+import com.example.jakartaee.ex.OrderRemoveException;
 import com.example.jakartaee.ex.ParsingException;
 import com.example.jakartaee.service.EmployerService;
 import com.example.jakartaee.service.OrderService;
@@ -114,6 +115,7 @@ public class EmployerController {
             throw new ParsingException("Parsing exception: " + from + " or " + to);
         }
         Stream<Order> filteredOrderStream = existedOrders.stream()
+                .filter(order -> !order.isBooked())
                 .filter(order -> order.getStartDate().isAfter(fromDate) && order.getStartDate().isBefore(toDate));
 
         if (scheduleId != null) {
@@ -134,7 +136,12 @@ public class EmployerController {
         if (existedOrders.stream().map(Order::getId).noneMatch(id -> Objects.equals(id, orderId))) {
             throw new EntityExistsException("Order with id:" + orderId + " doesn't exist for Employer " + employerId);
         }
-        existedOrders.remove(orderService.findById(orderId));
+        Order order = orderService.findById(orderId);
+
+        if (order.isBooked()) {
+            throw new OrderRemoveException("Order with id:" + orderId + " is booked ");
+        }
+        existedOrders.remove(order);
         return employerService.update(employer);
     }
 
@@ -181,7 +188,7 @@ public class EmployerController {
         return employerService.findAll();
     }
 
-    @POST
+    @DELETE
     @Path("/{id}")
     @Produces("application/json")
     public Employer deleteEmployer(@PathParam("id") Long id) {

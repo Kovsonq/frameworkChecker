@@ -1,7 +1,6 @@
 package com.example.jakartaee.service.impl;
 
 import com.example.jakartaee.domain.Status;
-import com.example.jakartaee.domain.User;
 import com.example.jakartaee.repository.StatusRepository;
 import com.example.jakartaee.service.StatusService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -60,6 +59,46 @@ public class StatusServiceImpl implements StatusService, Serializable {
         Status status = findById(id);
         statusRepository.delete(status);
         return status;
+    }
+
+    @Override
+    public Status approve(Long id) {
+        Status status = findById(id);
+        status.setApprovedTime();
+        return statusRepository.update(status)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity (approving) " + status));
+    }
+
+    @Override
+    public Status cancel(Long id) {
+        Status status = findById(id);
+        status.setCanceledTime();
+        return statusRepository.update(status)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity (canceling) " + status));
+    }
+
+    @Override
+    public Status start(Long id) {
+        Status status = findById(id);
+        status.setStartedTime();
+        return statusRepository.update(status)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity (starting) " + status));
+    }
+
+    @Override
+    public Status finish(Long id) {
+        Status status = findById(id);
+        status.setFinishedTime();
+        return statusRepository.update(status)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity (finishing) " + status));
+    }
+
+    @Override
+    public Status close(Long id) {
+        Status status = findById(id);
+        status.setClosedTime();
+        return statusRepository.update(status)
+                .orElseThrow(() -> new EntityExistsException("Error during updating entity (closing) " + status));
     }
 
 }

@@ -1,10 +1,9 @@
 package com.example.jakartaee.service.impl;
 
 import com.example.jakartaee.domain.Order;
-import com.example.jakartaee.domain.Service;
 import com.example.jakartaee.domain.dto.OrdersDetailsDto;
 import com.example.jakartaee.domain.values.ScheduleDetails;
-import com.example.jakartaee.ex.OrderCreatingException;
+import com.example.jakartaee.ex.OrderCreateException;
 import com.example.jakartaee.repository.OrderRepository;
 import com.example.jakartaee.service.OrderService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -76,6 +75,20 @@ public class OrderServiceImpl implements OrderService, Serializable {
     }
 
     @Override
+    public Order bookOrder(Long id) {
+        Order order = findById(id);
+        order.setBooked(true);
+        return order;
+    }
+
+    @Override
+    public Order releaseOrder(Long id) {
+        Order order = findById(id);
+        order.setBooked(false);
+        return order;
+    }
+
+    @Override
     public List<Order> processOrders(List<Order> newOrders, List<Order> existedOrders) {
         List<ZonedDateTime> zonedDateTimeList = newOrders.stream().map(Order::getStartDate).collect(Collectors.toList());
         checkNewOrdersTimeToConflicts(existedOrders, zonedDateTimeList);
@@ -108,7 +121,7 @@ public class OrderServiceImpl implements OrderService, Serializable {
                 .collect(Collectors.toList());
 
         if (!conflictTime.isEmpty()) {
-            throw new OrderCreatingException("Order has wrong details to be created. It has conflict with another one." +
+            throw new OrderCreateException("Order has wrong details to be created. It has conflict with another one." +
                     " Conflict time: " + conflictTime);
         }
     }

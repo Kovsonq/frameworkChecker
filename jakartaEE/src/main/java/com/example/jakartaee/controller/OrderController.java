@@ -1,9 +1,12 @@
 package com.example.jakartaee.controller;
 
+import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.domain.Order;
+import com.example.jakartaee.service.EmployerService;
 import com.example.jakartaee.service.OrderService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -18,10 +21,12 @@ import java.util.stream.Collectors;
 public class OrderController {
 
     private final OrderService orderService;
+    private final EmployerService employerService;
 
     @Inject
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, EmployerService employerService) {
         this.orderService = orderService;
+        this.employerService = employerService;
     }
 
     @POST
@@ -49,7 +54,18 @@ public class OrderController {
         return orderService.findAll();
     }
 
-    @POST
+    @PUT
+    @Path("/{orderId}/{employerId}")
+    @Produces("application/json")
+    public Order attachOrderToEmployer(@PathParam("orderId") Long orderId,
+                                       @PathParam("employerId") Long employerId) {
+        Order order = orderService.findById(orderId);
+        Employer employer = employerService.findById(employerId);
+        order.setEmployer(employer);
+        return orderService.update(order);
+    }
+
+    @DELETE
     @Path("/{id}")
     @Produces("application/json")
     public Order deleteOrder(@PathParam("id") Long id) {

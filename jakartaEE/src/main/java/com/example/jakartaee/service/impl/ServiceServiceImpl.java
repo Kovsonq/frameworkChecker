@@ -1,7 +1,6 @@
 package com.example.jakartaee.service.impl;
 
 import com.example.jakartaee.domain.Service;
-import com.example.jakartaee.domain.Status;
 import com.example.jakartaee.repository.ServiceRepository;
 import com.example.jakartaee.service.ServiceService;
 import jakarta.enterprise.context.ApplicationScoped;
