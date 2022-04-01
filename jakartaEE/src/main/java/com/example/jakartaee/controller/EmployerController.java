@@ -3,6 +3,7 @@ package com.example.jakartaee.controller;
 import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.domain.Order;
 import com.example.jakartaee.domain.Service;
+import com.example.jakartaee.domain.dto.OrdersDeleteDto;
 import com.example.jakartaee.domain.dto.OrdersDetailsDto;
 import com.example.jakartaee.ex.OrderRemoveException;
 import com.example.jakartaee.ex.ParsingException;
@@ -25,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Path("/employers")
@@ -59,8 +61,9 @@ public class EmployerController {
     public Employer addOrdersToEmployer(@Valid List<Order> orders, @PathParam("id") Long id) {
         Employer employer = employerService.findById(id);
         List<Order> existedOrders = employer.getOrders();
-        existedOrders.addAll(orderService.processOrders(orders, existedOrders));
-        return employerService.update(employer);
+        List<Order> orderList = orderService.processOrders(orders, existedOrders, employer);
+        orderList.forEach(orderService::save);
+        return employerService.findById(id);
     }
 
     @PUT
@@ -69,10 +72,11 @@ public class EmployerController {
     public Employer addOrdersToEmployerByDetails(@Valid OrdersDetailsDto dto, @PathParam("id") Long id) {
         Employer employer = employerService.findById(id);
         List<Order> existedOrders = employer.getOrders();
-        List<Order> newOrders = orderService.createOrders(dto, existedOrders);
+        List<Order> newOrders = orderService.constructOrders(dto, existedOrders, employer);
 
         if (dto.getScheduleDetails() != null) {
-            List<Order> scheduleOrders = orderService.scheduleOrders(newOrders, existedOrders, dto.getScheduleDetails());
+            List<Order> scheduleOrders = orderService.scheduleOrders(newOrders, existedOrders,
+                    dto.getScheduleDetails(), employer);
             newOrders.addAll(scheduleOrders);
         }
         existedOrders.addAll(newOrders);
@@ -80,69 +84,41 @@ public class EmployerController {
     }
 
     @PUT
-    @Path("/{employerId}/orders/{orderId}")
+    @Path("/{id}/orders/delete")
     @Produces("application/json")
-    public Employer addOrderToEmployer(@PathParam("employerId") Long employerId,
-                                       @PathParam("orderId") Long orderId) {
-        Employer employer = employerService.findById(employerId);
-        List<Order> existedOrders = employer.getOrders();
-
-        if (existedOrders.stream().map(Order::getId).anyMatch(id -> Objects.equals(id, orderId))) {
-            throw new EntityExistsException("Order with id:" + orderId + " already exists for Employer " + employerId);
-        }
-        existedOrders.add(orderService.findById(orderId));
-        return employerService.update(employer);
-    }
-
-    @DELETE
-    @Path("/{employerId}/orders/uuid={uuid}&from={from}&to={to}")
-    @Produces("application/json")
-    public Employer deleteOrdersFromEmployer(@PathParam("employerId") Long employerId,
-                                             @PathParam("uuid") String uuid,
-                                             @PathParam("from") String from,
-                                             @PathParam("to") String to) {
-        Employer employer = employerService.findById(employerId);
+    public Employer deleteOrdersFromEmployer(@PathParam("id") Long id,
+                                             @Valid OrdersDeleteDto dto) {
+        Employer employer = employerService.findById(id);
         List<Order> existedOrders = employer.getOrders();
         ZonedDateTime fromDate;
         ZonedDateTime toDate;
         UUID scheduleId;
 
         try {
-            fromDate = from == null ? ZonedDateTime.from(LocalDate.MIN) : ZonedDateTime.parse(from);
-            toDate = to == null ? ZonedDateTime.from(LocalDate.MAX) : ZonedDateTime.parse(to);
-            scheduleId = uuid == null ? null : UUID.fromString(uuid);
+            fromDate = dto.getStartDate() == null ? ZonedDateTime.from(LocalDate.MIN) : ZonedDateTime.parse(dto.getStartDate());
+            toDate = dto.getEndDate() == null ? ZonedDateTime.from(LocalDate.MAX) : ZonedDateTime.parse(dto.getEndDate());
+            scheduleId = dto.getScheduleId() == null ? null : UUID.fromString(dto.getScheduleId());
         } catch (Exception exception) {
-            throw new ParsingException("Parsing exception: " + from + " or " + to);
+            throw new ParsingException("Parsing exception: " + dto + "Cause: " + exception.getMessage());
         }
         Stream<Order> filteredOrderStream = existedOrders.stream()
-                .filter(order -> !order.isBooked())
                 .filter(order -> order.getStartDate().isAfter(fromDate) && order.getStartDate().isBefore(toDate));
 
         if (scheduleId != null) {
             filteredOrderStream = filteredOrderStream.filter(order -> scheduleId.equals(order.getScheduleId()));
         }
-        filteredOrderStream.forEach(existedOrders::remove);
-        return employerService.update(employer);
-    }
+        List<Order> ordersToDelete = filteredOrderStream.collect(Collectors.toList());
+        List<Order> ordersCantBeDeleted = ordersToDelete.stream()
+                .filter(Order::isBooked)
+                .collect(Collectors.toList());
+        ordersToDelete.removeAll(ordersCantBeDeleted);
+        ordersToDelete.stream().map(Order::getId).forEach(orderService::delete);
 
-    @DELETE
-    @Path("/{employerId}/orders/{orderId}")
-    @Produces("application/json")
-    public Employer deleteOrderFromEmployer(@PathParam("employerId") Long employerId,
-                                            @PathParam("orderId") Long orderId) {
-        Employer employer = employerService.findById(employerId);
-        List<Order> existedOrders = employer.getOrders();
-
-        if (existedOrders.stream().map(Order::getId).noneMatch(id -> Objects.equals(id, orderId))) {
-            throw new EntityExistsException("Order with id:" + orderId + " doesn't exist for Employer " + employerId);
+        if (!ordersCantBeDeleted.isEmpty()) {
+            throw new OrderRemoveException("Deleted " + ordersToDelete.size() + " orders." +
+                    "Orders are already booked and couldn't be deleted: " + ordersCantBeDeleted);
         }
-        Order order = orderService.findById(orderId);
-
-        if (order.isBooked()) {
-            throw new OrderRemoveException("Order with id:" + orderId + " is booked ");
-        }
-        existedOrders.remove(order);
-        return employerService.update(employer);
+        return employerService.findById(id);
     }
 
     @PUT
@@ -181,6 +157,14 @@ public class EmployerController {
     public Employer findEmployer(@PathParam("id") Long id) {
         return employerService.findById(id);
     }
+
+    @GET
+    @Path("/employerName={employerName}")
+    @Produces("application/json")
+    public Employer findUserByName(@PathParam("employerName") String employerName) {
+        return employerService.findByName(employerName);
+    }
+
 
     @GET
     @Produces("application/json")

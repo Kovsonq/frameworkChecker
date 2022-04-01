@@ -23,9 +23,14 @@ public interface OrderService {
 
     Order releaseOrder(Long id);
 
-    List<Order> processOrders(List<Order> newOrders, List<Order> existedOrders);
+    Order reopenOrder(Long id);
 
-    List<Order> createOrders(OrdersDetailsDto dto, List<Order> orders);
+    Order reattachEmployer(Long orderId, Employer employer);
 
-    List<Order> scheduleOrders(List<Order> ordersToSchedule, List<Order> existedOrders, ScheduleDetails scheduleDetails);
+    List<Order> processOrders(List<Order> newOrders, List<Order> existedOrders, Employer employer);
+
+    List<Order> constructOrders(OrdersDetailsDto dto, List<Order> orders, Employer employer);
+
+    List<Order> scheduleOrders(List<Order> ordersToSchedule, List<Order> existedOrders,
+                               ScheduleDetails scheduleDetails, Employer employer);
 }

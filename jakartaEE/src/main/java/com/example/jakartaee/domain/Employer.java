@@ -1,10 +1,10 @@
 package com.example.jakartaee.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.NamedQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +19,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -28,9 +27,10 @@ import java.util.Objects;
 @Table(name = "employer")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @NamedQuery(name = "Employer.findAll", query = "Select e from Employer e")
+@NamedQuery(name = "Employer.findByName", query = "Select e from Employer e where e.name = :name")
+@NamedQuery(name = "Employer.findByEmail", query = "Select e from Employer e where e.email = :email")
 public class Employer implements Serializable {
 
     @Id
@@ -59,10 +59,10 @@ public class Employer implements Serializable {
             joinColumns = { @JoinColumn(name = "employer_id") },
             inverseJoinColumns = { @JoinColumn(name = "service_id") }
     )
-    private List<Service> services = new ArrayList<>();
+    private List<Service> services;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "employer")
-    private List<Order> orders = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "employer", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private List<Order> orders;
 
     public Employer(String name, char[] password, String phone, String email, Company company) {
         this.name = name;
@@ -77,17 +77,13 @@ public class Employer implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Employer employer = (Employer) o;
-        return Objects.equals(name, employer.name) && Arrays.equals(password, employer.password) &&
-                Objects.equals(phone, employer.phone) && Objects.equals(email, employer.email) &&
-                Objects.equals(company, employer.company) && Objects.equals(services, employer.services) &&
-                Objects.equals(orders, employer.orders);
+        return Objects.equals(name, employer.name) && Arrays.equals(password, employer.password) && Objects.equals(phone, employer.phone) && Objects.equals(email, employer.email);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(name, phone, email, company, services, orders);
+        int result = Objects.hash(name, phone, email);
         result = 31 * result + Arrays.hashCode(password);
         return result;
     }
-
 }

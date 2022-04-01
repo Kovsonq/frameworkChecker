@@ -11,6 +11,10 @@ public interface EmployerRepository {
 
     Optional<Employer> findById(Long id);
 
+    Optional<Employer> findByName(String employerName);
+
+    Optional<Employer> findByEmail(String employerEmail);
+
     List<Employer> findAll();
 
     Optional<Employer> update(Employer employer);

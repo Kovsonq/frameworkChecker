@@ -2,16 +2,17 @@ package com.example.jakartaee.repository.impl;
 
 import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.repository.EmployerRepository;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-@ApplicationScoped
+@Stateless
 @Slf4j
 public class EmployerRepositoryJpa implements EmployerRepository, Serializable {
 
@@ -44,6 +45,32 @@ public class EmployerRepositoryJpa implements EmployerRepository, Serializable {
     public Optional<Employer> findById(Long id)  {
         Employer employer = em.find(Employer.class, id);
         return employer != null ? Optional.of(employer) : Optional.empty();
+    }
+
+    @Override
+    public Optional<Employer> findByName(String employerName) {
+        try {
+            Employer employer = em.createNamedQuery("Employer.findByName", Employer.class)
+                    .setParameter("name", employerName)
+                    .getSingleResult();
+            return Optional.of(employer);
+        } catch (PersistenceException exception) {
+            log.trace(exception.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<Employer> findByEmail(String employerEmail) {
+        try {
+            Employer employer = em.createNamedQuery("Employer.findByEmail", Employer.class)
+                    .setParameter("email", employerEmail)
+                    .getSingleResult();
+            return Optional.of(employer);
+        } catch (PersistenceException exception) {
+            log.trace(exception.getMessage());
+            return Optional.empty();
+        }
     }
 
     @Override

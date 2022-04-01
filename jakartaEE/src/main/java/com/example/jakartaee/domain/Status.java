@@ -1,9 +1,11 @@
 package com.example.jakartaee.domain;
 
 import com.example.jakartaee.domain.values.OrderStatus;
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.NamedQuery;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +23,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "status")
 @Getter
-@ToString
+@NoArgsConstructor
 @NamedQuery(name = "Status.findAll", query = "Select s from Status s")
 public class Status implements Serializable {
 
@@ -31,6 +33,9 @@ public class Status implements Serializable {
 
     @Column(name="createdTime", updatable = false)
     private ZonedDateTime createdTime;
+
+    @Column(name="requestedTime")
+    private ZonedDateTime requestedTime;
     @Column(name="approvedTime")
     private ZonedDateTime approvedTime;
     @Column(name="canceledTime")
@@ -51,19 +56,33 @@ public class Status implements Serializable {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JsonbTransient
     private Order order;
 
-    public Status() {
+    public Status(Order order) {
         this.createdTime = ZonedDateTime.now();
         this.lastChangedTime = ZonedDateTime.now();
         this.orderStatus = OrderStatus.CREATED;
+        this.order = order;
     }
 
     public Status(ZonedDateTime createdTime) {
         this.createdTime = createdTime;
         this.lastChangedTime = ZonedDateTime.now();
         this.orderStatus = OrderStatus.CREATED;
+    }
+
+    public void setRequestedTime() {
+        this.requestedTime = ZonedDateTime.now();
+        this.lastChangedTime = ZonedDateTime.now();
+        this.orderStatus = OrderStatus.REQUESTED;
+    }
+
+    public void setRequestedTime(ZonedDateTime requestedTime) {
+        this.requestedTime = requestedTime;
+        this.lastChangedTime = ZonedDateTime.now();
+        this.orderStatus = OrderStatus.REQUESTED;
     }
 
     public void setApprovedTime() {
@@ -126,21 +145,26 @@ public class Status implements Serializable {
         this.orderStatus = OrderStatus.CLOSED;
     }
 
+    public void resetTime() {
+        this.requestedTime = null;
+        this.approvedTime = null;
+        this.canceledTime = null;
+        this.startedTime = null;
+        this.finishedTime = null;
+        this.closedTime = null;
+        this.orderStatus = OrderStatus.CREATED;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Status status = (Status) o;
-        return Objects.equals(createdTime, status.createdTime) && Objects.equals(approvedTime, status.approvedTime) &&
-                Objects.equals(startedTime, status.startedTime) && Objects.equals(finishedTime, status.finishedTime) &&
-                Objects.equals(closedTime, status.closedTime) && Objects.equals(lastChangedTime, status.lastChangedTime) &&
-                orderStatus == status.orderStatus && Objects.equals(order, status.order);
+        return Objects.equals(createdTime, status.createdTime) && Objects.equals(approvedTime, status.approvedTime) && Objects.equals(canceledTime, status.canceledTime) && Objects.equals(startedTime, status.startedTime) && Objects.equals(finishedTime, status.finishedTime) && Objects.equals(closedTime, status.closedTime) && Objects.equals(lastChangedTime, status.lastChangedTime) && orderStatus == status.orderStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(createdTime, approvedTime, startedTime, finishedTime, closedTime,
-                lastChangedTime, orderStatus, order);
+        return Objects.hash(createdTime, approvedTime, canceledTime, startedTime, finishedTime, closedTime, lastChangedTime, orderStatus);
     }
-
 }

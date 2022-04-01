@@ -1,7 +1,9 @@
 package com.example.jakartaee.service.impl;
 
+import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.domain.Order;
 import com.example.jakartaee.domain.dto.OrdersDetailsDto;
+import com.example.jakartaee.domain.values.OrderStatus;
 import com.example.jakartaee.domain.values.ScheduleDetails;
 import com.example.jakartaee.ex.OrderCreateException;
 import com.example.jakartaee.repository.OrderRepository;
@@ -70,14 +72,15 @@ public class OrderServiceImpl implements OrderService, Serializable {
     @Override
     public Order delete(Long id) {
         Order order = findById(id);
-        orderRepository.delete(order);
-        return order;
+        return orderRepository.delete(order)
+                .orElseThrow(() -> new EntityExistsException("Error during deleting entity " + order));
     }
 
     @Override
     public Order bookOrder(Long id) {
         Order order = findById(id);
         order.setBooked(true);
+        order.getStatus().setRequestedTime();
         return order;
     }
 
@@ -85,22 +88,47 @@ public class OrderServiceImpl implements OrderService, Serializable {
     public Order releaseOrder(Long id) {
         Order order = findById(id);
         order.setBooked(false);
+        order.getStatus().setCanceledTime();
         return order;
     }
 
     @Override
-    public List<Order> processOrders(List<Order> newOrders, List<Order> existedOrders) {
-        List<ZonedDateTime> zonedDateTimeList = newOrders.stream().map(Order::getStartDate).collect(Collectors.toList());
+    public Order reopenOrder(Long id) {
+        Order order = findById(id);
+        if (order.isBooked()) {
+            throw new OrderCreateException("Order has wrong details to be reopened. It is booked yet.");
+        }
+        order.getStatus().resetTime();
+        return update(order);
+    }
+
+    @Override
+    public Order reattachEmployer(Long orderId, Employer employer) {
+        Order order = findById(orderId);
+
+        if (isOrderHasConflict(employer.getOrders(), order.getStartDate())){
+            throw new OrderCreateException("Order has wrong details to be reattached. It has conflict with another one." +
+                    " Conflict time: " + order.getStartDate());
+        }
+        order.setEmployer(employer);
+        return update(order);
+    }
+
+    @Override
+    public List<Order> processOrders(List<Order> newOrders, List<Order> existedOrders, Employer employer) {
+        List<ZonedDateTime> zonedDateTimeList = newOrders.stream()
+                .map(Order::getStartDate)
+                .collect(Collectors.toList());
         checkNewOrdersTimeToConflicts(existedOrders, zonedDateTimeList);
 
         List<Order> processedOrders = new ArrayList<>();
         newOrders.forEach(order -> processedOrders.add(new Order(order.getStartDate(), order.getEndDate(),
-                order.getDescription())));
+                order.getDescription(), employer)));
         return processedOrders;
     }
 
     @Override
-    public List<Order> createOrders(OrdersDetailsDto dto, List<Order> orders) {
+    public List<Order> constructOrders(OrdersDetailsDto dto, List<Order> existedOrders, Employer employer) {
         int quantity = dto.getQuantity() == null ? 1 : dto.getQuantity();
         long pauseDuration = dto.getPauseDuration() == null ? 0 : dto.getPauseDuration();
         ZonedDateTime currentStartTime = dto.getStartDate();
@@ -110,25 +138,28 @@ public class OrderServiceImpl implements OrderService, Serializable {
             zonedDateTimeList.add(currentStartTime);
             currentStartTime = ChronoUnit.MINUTES.addTo(currentStartTime, dto.getDuration() + pauseDuration);
         }
-        checkNewOrdersTimeToConflicts(orders, zonedDateTimeList);
-        zonedDateTimeList.forEach(startTime -> orders.add(new Order(startTime, dto.getDuration())));
-        return orders;
+        checkNewOrdersTimeToConflicts(existedOrders, zonedDateTimeList);
+        return zonedDateTimeList.stream()
+                .map(startTime -> new Order(startTime, dto.getDuration(), employer))
+                .collect(Collectors.toList());
     }
 
     private void checkNewOrdersTimeToConflicts(List<Order> existedOrders, List<ZonedDateTime> scheduledTime) {
         List<ZonedDateTime> conflictTime = scheduledTime.stream()
-                .filter(time -> isNewOrderHasConflict(existedOrders, time))
+                .filter(time -> isOrderHasConflict(existedOrders, time))
                 .collect(Collectors.toList());
 
         if (!conflictTime.isEmpty()) {
             throw new OrderCreateException("Order has wrong details to be created. It has conflict with another one." +
-                    " Conflict time: " + conflictTime);
+                    " Conflict time: " + conflictTime.stream()
+                    .map(ZonedDateTime::toString)
+                    .collect(Collectors.joining("-", "{", "}")));
         }
     }
 
     @Override
     public List<Order> scheduleOrders(List<Order> ordersToSchedule, List<Order> existedOrders,
-                                      ScheduleDetails scheduleDetails) {
+                                      ScheduleDetails scheduleDetails, Employer employer) {
         LocalDate localStartDate = scheduleDetails.getStartDay().toLocalDate();
         LocalDate localEndDate = scheduleDetails.getEndDay().toLocalDate();
 
@@ -145,22 +176,24 @@ public class OrderServiceImpl implements OrderService, Serializable {
                 .collect(Collectors.toList());
 
         checkNewOrdersTimeToConflicts(existedOrders, timeToSchedule);
-        return addOrdersToDates(ordersToSchedule, dayDiffCollector);
+        return addOrdersToDates(ordersToSchedule, dayDiffCollector, employer);
     }
 
-    private List<Order> addOrdersToDates(List<Order> ordersToSchedule, List<Long> listDaysBetween) {
+    private List<Order> addOrdersToDates(List<Order> ordersToSchedule, List<Long> listDaysBetween, Employer employer) {
         List<Order> scheduledOrderList = new ArrayList<>(ordersToSchedule);
         ordersToSchedule.forEach(order -> listDaysBetween
                 .forEach(value -> scheduledOrderList.add(new Order(order.getStartDate().plusDays(value),
-                        order.getDuration(), UUID.randomUUID()))
+                        order.getDuration(), UUID.randomUUID(), employer))
                 )
         );
         return scheduledOrderList;
     }
 
-    private boolean isNewOrderHasConflict(List<Order> orders, ZonedDateTime newOrderDate) {
-        return orders.stream().anyMatch(order -> order.getStartDate().isAfter(newOrderDate)
-                && order.getStartDate().isBefore(newOrderDate));
+    private boolean isOrderHasConflict(List<Order> orders, ZonedDateTime newOrderDate) {
+        return orders.stream()
+                .filter(order -> !OrderStatus.CLOSED.equals(order.getStatus().getOrderStatus()))
+                .anyMatch(order -> newOrderDate.isAfter(order.getStartDate().minusSeconds(1))
+                        && newOrderDate.isBefore(order.getStartDate().plusSeconds(1)));
     }
 
 }

@@ -1,7 +1,8 @@
 package com.example.jakartaee.service.impl;
 
-import com.example.jakartaee.domain.Employer;
+import com.example.jakartaee.domain.Order;
 import com.example.jakartaee.domain.User;
+import com.example.jakartaee.repository.OrderRepository;
 import com.example.jakartaee.repository.UserRepository;
 import com.example.jakartaee.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,10 +19,12 @@ import java.util.List;
 public class UserServiceImpl implements UserService, Serializable {
 
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
     @Inject
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, OrderRepository orderRepository) {
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -84,8 +87,16 @@ public class UserServiceImpl implements UserService, Serializable {
     @Override
     public User delete(Long id) {
         User user = findById(id);
-        userRepository.delete(user);
-        return user;
+        user.getOrders().stream()
+                .filter(Order::isBooked)
+                .forEach(order -> {
+            order.setUser(null);
+            order.setBooked(false);
+            order.getStatus().setCanceledTime();
+            orderRepository.update(order);
+        });
+        return userRepository.delete(user)
+                .orElseThrow(() -> new EntityExistsException("Error during deleting entity " + user));
     }
 
 }

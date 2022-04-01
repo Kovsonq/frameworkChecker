@@ -55,8 +55,8 @@ public class ServiceServiceImpl implements ServiceService, Serializable {
     @Override
     public Service delete(Long id) {
         Service service = findById(id);
-        serviceRepository.delete(service);
-        return service;
+        return serviceRepository.delete(service)
+                .orElseThrow(() -> new EntityExistsException("Error during deleting entity " + service));
     }
 
 }

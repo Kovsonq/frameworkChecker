@@ -5,6 +5,7 @@ import com.example.jakartaee.repository.CompanyRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -36,11 +37,15 @@ public class CompanyRepositoryJpa implements CompanyRepository, Serializable {
     }
 
     @Override
-    public Optional<Company> findByName(String userName)  {
-        Company company = em.createNamedQuery("Company.findByName", Company.class)
-                .setParameter("name", userName)
-                .getSingleResult();
-        return company != null ? Optional.of(company) : Optional.empty();
+    public Optional<Company> findByName(String companyName)  {
+        try {
+            Company company = em.createNamedQuery("Company.findByName", Company.class)
+                    .setParameter("name", companyName)
+                    .getSingleResult();
+            return Optional.of(company);
+        } catch (PersistenceException exception) {
+            return Optional.empty();
+        }
     }
 
     @Override

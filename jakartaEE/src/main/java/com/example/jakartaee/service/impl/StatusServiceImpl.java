@@ -57,8 +57,8 @@ public class StatusServiceImpl implements StatusService, Serializable {
     @Override
     public Status delete(Long id) {
         Status status = findById(id);
-        statusRepository.delete(status);
-        return status;
+        return statusRepository.delete(status)
+                .orElseThrow(() -> new EntityExistsException("Error during deleting entity " + status));
     }
 
     @Override

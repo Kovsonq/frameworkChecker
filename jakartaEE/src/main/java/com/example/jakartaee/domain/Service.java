@@ -4,7 +4,6 @@ import jakarta.persistence.NamedQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +20,6 @@ import java.util.Objects;
 @Table(name = "service")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @NamedQuery(name = "Service.findAll", query = "Select s from Service s")
 public class Service implements Serializable {
@@ -38,7 +35,7 @@ public class Service implements Serializable {
     private String description;
 
     @ManyToMany(mappedBy = "services")
-    private List<Employer> employers = new ArrayList<>();
+    private List<Employer> employers;
 
     public Service(String name, String description) {
         this.name = name;

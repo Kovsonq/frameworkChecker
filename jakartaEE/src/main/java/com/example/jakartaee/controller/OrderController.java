@@ -48,21 +48,26 @@ public class OrderController {
         return orderService.findById(id);
     }
 
+    @PUT
+    @Path("{orderId}/employers/{employerId}")
+    @Produces("application/json")
+    public Order reattachOrderToEmployer(@PathParam("orderId") Long orderId,
+                                            @PathParam("employerId") Long employerId) {
+        Employer employer = employerService.findById(employerId);
+        return orderService.reattachEmployer(orderId, employer);
+    }
+
+    @PUT
+    @Path("{orderId}/reopen")
+    @Produces("application/json")
+    public Order reopenOrder(@PathParam("orderId") Long orderId) {
+        return orderService.reopenOrder(orderId);
+    }
+
     @GET
     @Produces("application/json")
     public List<Order> findAllOrder() {
         return orderService.findAll();
-    }
-
-    @PUT
-    @Path("/{orderId}/{employerId}")
-    @Produces("application/json")
-    public Order attachOrderToEmployer(@PathParam("orderId") Long orderId,
-                                       @PathParam("employerId") Long employerId) {
-        Order order = orderService.findById(orderId);
-        Employer employer = employerService.findById(employerId);
-        order.setEmployer(employer);
-        return orderService.update(order);
     }
 
     @DELETE

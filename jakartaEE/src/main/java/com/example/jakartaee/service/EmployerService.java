@@ -10,6 +10,10 @@ public interface EmployerService {
 
     Employer findById(Long id);
 
+    Employer findByName(String employerName);
+
+    Employer findByEmail(String employerEmail);
+
     List<Employer> findAll();
 
     Employer update(Employer employer);

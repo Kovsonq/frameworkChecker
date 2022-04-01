@@ -24,6 +24,7 @@
       <property name="jakarta.persistence.jdbc.password" value="root"/>
       <!-- Configuring The Database Connection Details -->
       <property name="jakarta.persistence.schema-generation.database.action" value="create" />
+      <property name="eclipselink.cache.shared.default" value="false" />
 
       <!-- Configuring The JPA hibernate -->
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL9Dialect"/>

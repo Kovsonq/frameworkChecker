@@ -1,7 +1,6 @@
 package com.example.jakartaee.service.impl;
 
 import com.example.jakartaee.domain.Company;
-import com.example.jakartaee.domain.Employer;
 import com.example.jakartaee.repository.CompanyRepository;
 import com.example.jakartaee.repository.impl.CompanyRepositoryJpa;
 import com.example.jakartaee.service.CompanyService;
@@ -68,9 +67,9 @@ public class CompanyServiceImpl implements CompanyService, Serializable {
 
     @Override
     public Company delete(Long id) {
-        Company Company = findById(id);
-        companyRepository.delete(Company);
-        return Company;
+        Company company = findById(id);
+        return companyRepository.delete(company)
+                .orElseThrow(() -> new EntityExistsException("Error during deleting entity " + company));
     }
 
 }

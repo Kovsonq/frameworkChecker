@@ -1,7 +1,6 @@
 package com.example.jakartaee.domain.dto;
 
 import com.example.jakartaee.domain.values.ScheduleDetails;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;

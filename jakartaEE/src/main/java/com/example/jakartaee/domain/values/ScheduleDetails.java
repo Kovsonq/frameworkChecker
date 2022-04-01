@@ -1,6 +1,5 @@
 package com.example.jakartaee.domain.values;
 
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
